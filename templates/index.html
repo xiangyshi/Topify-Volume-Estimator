@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ChatGPT Volume Estimator</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>ChatGPT Volume Estimator</h1>
+        
+        <!-- Input Section -->
+        <div class="input-section">
+            <div class="input-group">
+                <label for="keyword">Keyword</label>
+                <input type="text" id="keyword" placeholder="e.g., faceless video ai" required>
+            </div>
+            <div class="input-group">
+                <label for="domain">Domain</label>
+                <input type="text" id="domain" placeholder="e.g., videoinu.com" required>
+            </div>
+        </div>
+        
+        <!-- API Token Section -->
+        <div class="input-group">
+            <label for="apiToken">DataForSEO API Token</label>
+            <input type="password" id="apiToken" placeholder="Enter your DataForSEO API token" required>
+            <small style="color: #7f8c8d; font-size: 12px; margin-top: 5px;">
+                Get your token from <a href="https://app.dataforseo.com/api-dashboard" target="_blank">DataForSEO Dashboard</a>
+            </small>
+        </div>
+        
+        <!-- Parameters Section -->
+        <div class="parameters-section">
+            <h3>⚙️ Model Parameters</h3>
+            <div class="parameters-grid">
+                <div class="parameter-group">
+                    <label for="visWeight">Visibility Weight</label>
+                    <input type="range" id="visWeight" min="0" max="5" step="0.1" value="1.5">
+                    <div class="parameter-value" id="visValue">1.5</div>
+                </div>
+                <div class="parameter-group">
+                    <label for="semWeight">Semantic Weight</label>
+                    <input type="range" id="semWeight" min="0" max="5" step="0.1" value="1.0">
+                    <div class="parameter-value" id="semValue">1.0</div>
+                </div>
+                <div class="parameter-group disabled-parameter">
+                    <label for="authWeight">Authority Weight (Disabled)</label>
+                    <input type="range" id="authWeight" min="0" max="5" step="0.1" value="1.0" disabled>
+                    <div class="parameter-value" id="authValue">1.0</div>
+                </div>
+                <div class="parameter-group">
+                    <label for="featWeight">Features Weight</label>
+                    <input type="range" id="featWeight" min="0" max="5" step="0.1" value="1.0">
+                    <div class="parameter-value" id="featValue">1.0</div>
+                </div>
+                <div class="parameter-group disabled-parameter">
+                    <label for="clicksWeight">Est. Clicks Weight (Disabled)</label>
+                    <input type="range" id="clicksWeight" min="0" max="5" step="0.1" value="1.0" disabled>
+                    <div class="parameter-value" id="clicksValue">1.0</div>
+                </div>
+                <div class="parameter-group">
+                    <label for="alpha">Visibility Decay (α)</label>
+                    <input type="range" id="alpha" min="0.05" max="0.5" step="0.01" value="0.15">
+                    <div class="parameter-value" id="alphaValue">0.15</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Status Message -->
+        <div id="statusMessage" class="status-message" style="display: none;"></div>
+        
+        <!-- Analyze Button -->
+        <button id="analyzeBtn" onclick="analyze()">🚀 Analyze Keyword & Domain</button>
+        
+        <!-- View Toggle -->
+        <div id="viewToggle" class="view-toggle" style="display: none;">
+            <div class="toggle-container">
+                <span class="toggle-label">View Mode:</span>
+                <div class="toggle-switch">
+                    <input type="radio" id="normalView" name="viewMode" value="normal" checked>
+                    <label for="normalView">Normal</label>
+                    <input type="radio" id="aggregateView" name="viewMode" value="aggregate">
+                    <label for="aggregateView">Aggregate</label>
+                    <div class="toggle-slider"></div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Loading Indicator -->
+        <div id="loading" class="loading" style="display: none;">
+            <div class="spinner"></div>
+            <p>🔄 Processing data...</p>
+        </div>
+        
+        <!-- Results Section -->
+        <div id="results" class="results">
+            <h2>📊 Analysis Results</h2>
+            
+            <div id="metrics">
+                <div class="metric">
+                    <div class="metric-value" id="keywordResult">-</div>
+                    <div class="metric-label">Keyword</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-value" id="domainResult">-</div>
+                    <div class="metric-label">Domain</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-value" id="totalVolume">-</div>
+                    <div class="metric-label">Total Potential</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-value" id="topShare">-</div>
+                    <div class="metric-label">Top Domain Share</div>
+                </div>
+            </div>
+            
+            <!-- Target Domain Summary -->
+            <div id="targetDomainSummary" style="display: none;">
+                <h3>🎯 Target Domain Summary</h3>
+                <div id="targetDomainStats" class="target-domain-summary">
+                    <!-- Target domain statistics will be populated here -->
+                </div>
+            </div>
+            
+            <h3 id="resultsTitle">Top Performing Domains</h3>
+            <table id="resultsTable">
+                <thead id="resultsHeader">
+                    <tr>
+                        <th>Domain</th>
+                        <th>Appearances</th>
+                        <th>Best Rank</th>
+                        <th>Worst Rank</th>
+                        <th>Avg Rank</th>
+                        <th>Avg Logit</th>
+                        <th>Total Domain Share</th>
+                        <th>Total AI Volume</th>
+                    </tr>
+                </thead>
+                <tbody id="resultsBody">
+                </tbody>
+            </table>
+            
+            <div id="dataFileInfo" style="margin-top: 20px; padding: 10px; background-color: #e8f4f8; border-radius: 5px;">
+                <strong>📁 Data Source:</strong> <span id="dataFile"></span>
+            </div>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='scripts.js') }}"></script>
+</body>
+</html>

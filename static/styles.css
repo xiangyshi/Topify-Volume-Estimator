@@ -1,0 +1,451 @@
+/* Topify.ai Style - ChatGPT Volume Estimator */
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0;
+    background: linear-gradient(135deg, #ffffff 0%, #e0f2fe 30%, #fce7f3 70%, #ffffff 100%);
+    min-height: 100vh;
+}
+
+.container {
+    background: transparent;
+    padding: 40px 20px;
+    border-radius: 0;
+    box-shadow: none;
+}
+
+h1 {
+    color: #000000;
+    text-align: center;
+    margin-bottom: 40px;
+    font-size: 2.5rem;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+}
+
+/* Input Section */
+.input-section {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+    margin-bottom: 32px;
+}
+
+.input-group {
+    display: flex;
+    flex-direction: column;
+}
+
+.input-group label {
+    font-weight: 600;
+    margin-bottom: 8px;
+    color: #000000;
+    font-size: 14px;
+}
+
+.input-group input {
+    padding: 16px;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    font-size: 16px;
+    background: #ffffff;
+    transition: all 0.2s ease;
+}
+
+.input-group input:focus {
+    border-color: #000000;
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.1);
+}
+
+.input-group small {
+    display: block;
+    margin-top: 8px;
+    color: #6b7280;
+    font-size: 12px;
+}
+
+.input-group small a {
+    color: #000000;
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.input-group small a:hover {
+    text-decoration: underline;
+}
+
+/* Parameters Section */
+.parameters-section {
+    background-color: #ffffff;
+    padding: 32px;
+    border-radius: 12px;
+    margin-bottom: 32px;
+    border: 1px solid #e5e7eb;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.parameters-section h3 {
+    color: #000000;
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin-bottom: 24px;
+}
+
+.parameters-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 24px;
+    margin-top: 0;
+}
+
+.parameter-group {
+    display: flex;
+    flex-direction: column;
+}
+
+.parameter-group label {
+    font-weight: 600;
+    margin-bottom: 8px;
+    color: #000000;
+    font-size: 14px;
+}
+
+.parameter-group input[type="range"] {
+    width: 100%;
+    margin: 8px 0;
+    height: 6px;
+    background: #e5e7eb;
+    border-radius: 3px;
+    outline: none;
+    -webkit-appearance: none;
+}
+
+.parameter-group input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 20px;
+    height: 20px;
+    background: #000000;
+    border-radius: 50%;
+    cursor: pointer;
+}
+
+.parameter-group input[type="range"]::-moz-range-thumb {
+    width: 20px;
+    height: 20px;
+    background: #000000;
+    border-radius: 50%;
+    cursor: pointer;
+    border: none;
+}
+
+.parameter-value {
+    font-size: 14px;
+    color: #000000;
+    text-align: center;
+    font-weight: 600;
+    margin-top: 4px;
+}
+
+/* Disabled Parameters */
+.disabled-parameter {
+    opacity: 0.4;
+    pointer-events: none;
+}
+
+.disabled-parameter label {
+    color: #9ca3af;
+}
+
+.disabled-parameter input[type="range"] {
+    background-color: #f3f4f6;
+}
+
+.disabled-parameter .parameter-value {
+    color: #9ca3af;
+}
+
+/* Buttons */
+button {
+    background-color: #000000;
+    color: #ffffff;
+    padding: 16px 32px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: 600;
+    width: 100%;
+    margin-top: 32px;
+    transition: all 0.2s ease;
+}
+
+button:hover {
+    background-color: #333333;
+    transform: translateY(-1px);
+}
+
+button:disabled {
+    background-color: #9ca3af;
+    cursor: not-allowed;
+    transform: none;
+}
+
+/* Status Messages */
+.status-message {
+    padding: 16px;
+    border-radius: 8px;
+    margin: 16px 0;
+    text-align: center;
+    font-weight: 500;
+    font-size: 14px;
+}
+
+.status-info {
+    background-color: #f0f9ff;
+    color: #0369a1;
+    border: 1px solid #bae6fd;
+}
+
+.status-success {
+    background-color: #f0fdf4;
+    color: #166534;
+    border: 1px solid #bbf7d0;
+}
+
+.status-error {
+    background-color: #fef2f2;
+    color: #dc2626;
+    border: 1px solid #fecaca;
+}
+
+/* Results Section */
+.results {
+    margin-top: 40px;
+    display: none;
+}
+
+.results h2 {
+    color: #000000;
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin-bottom: 24px;
+}
+
+.results h3 {
+    color: #000000;
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin-bottom: 20px;
+}
+
+/* Tables */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 24px 0;
+    background: #ffffff;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+th, td {
+    border: none;
+    padding: 16px;
+    text-align: left;
+    font-size: 14px;
+}
+
+th {
+    background-color: #f8f9fa;
+    color: #000000;
+    font-weight: 600;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+tr:nth-child(even) {
+    background-color: #f8f9fa;
+}
+
+/* Target Domain Highlighting */
+.target-domain-row {
+    background-color: #fef3c7 !important;
+    font-weight: 600;
+}
+
+.target-domain-row td {
+    background-color: #fef3c7 !important;
+    color: #000000;
+}
+
+/* Target Domain Summary */
+.target-domain-summary {
+    background-color: #fef3c7;
+    border: 1px solid #f59e0b;
+    border-radius: 12px;
+    padding: 24px;
+    margin: 24px 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 16px;
+}
+
+.target-domain-summary .stat-item {
+    text-align: center;
+    padding: 16px;
+    background-color: rgba(255, 255, 255, 0.8);
+    border-radius: 8px;
+    border: 1px solid rgba(245, 158, 11, 0.2);
+}
+
+.target-domain-summary .stat-value {
+    font-size: 24px;
+    font-weight: 700;
+    color: #000000;
+    display: block;
+    margin-bottom: 4px;
+}
+
+.target-domain-summary .stat-label {
+    font-size: 12px;
+    color: #6b7280;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-weight: 500;
+}
+
+/* Metrics */
+.metric {
+    display: inline-block;
+    margin: 12px;
+    padding: 20px;
+    background-color: #ffffff;
+    border-radius: 8px;
+    text-align: center;
+    border: 1px solid #e5e7eb;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    min-width: 120px;
+}
+
+.metric-value {
+    font-size: 28px;
+    font-weight: 700;
+    color: #000000;
+    margin-bottom: 4px;
+}
+
+.metric-label {
+    font-size: 12px;
+    color: #6b7280;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-weight: 500;
+}
+
+/* Loading Indicator */
+.loading {
+    text-align: center;
+    padding: 40px;
+}
+
+.loading p {
+    color: #6b7280;
+    font-size: 16px;
+    margin-top: 16px;
+    font-weight: 500;
+}
+
+.spinner {
+    border: 3px solid #f3f4f6;
+    border-top: 3px solid #000000;
+    border-radius: 50%;
+    width: 32px;
+    height: 32px;
+    animation: spin 1s linear infinite;
+    margin: 0 auto;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* View Toggle */
+.view-toggle {
+    margin: 24px 0;
+    text-align: center;
+}
+
+.toggle-container {
+    display: inline-flex;
+    align-items: center;
+    gap: 16px;
+    background: #ffffff;
+    padding: 12px 20px;
+    border-radius: 8px;
+    border: 1px solid #e5e7eb;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.toggle-label {
+    font-weight: 600;
+    color: #000000;
+    font-size: 14px;
+}
+
+.toggle-switch {
+    position: relative;
+    display: inline-flex;
+    background: #e5e7eb;
+    border-radius: 20px;
+    padding: 2px;
+    width: 196px;
+    height: 36px;
+}
+
+.toggle-switch input[type="radio"] {
+    display: none;
+}
+
+.toggle-switch label {
+    flex: 1;
+    text-align: center;
+    padding: 8px 16px;
+    font-size: 14px;
+    font-weight: 500;
+    color: #6b7280;
+    cursor: pointer;
+    border-radius: 18px;
+    transition: all 0.2s ease;
+    z-index: 2;
+    position: relative;
+    background: transparent;
+    line-height: 20px;
+}
+
+.toggle-switch input[type="radio"]:checked + label {
+    color: #ffffff;
+    font-weight: 600;
+}
+
+.toggle-slider {
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    width: 96px;
+    height: 36px;
+    background: #000000;
+    border-radius: 18px;
+    transition: all 0.2s ease;
+    z-index: 1;
+}
+
+.toggle-switch input[type="radio"]:last-of-type:checked ~ .toggle-slider {
+    transform: translateX(100px);
+}
