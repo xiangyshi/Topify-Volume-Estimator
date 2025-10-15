@@ -80,11 +80,30 @@ h1 {
 /* Parameters Section */
 .parameters-section {
     background-color: #ffffff;
-    padding: 32px;
+    padding: 24px 14px;
     border-radius: 12px;
-    margin-bottom: 32px;
+    margin-top: 14px;
+    margin-bottom: 24px;
     border: 1px solid #e5e7eb;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.params-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    cursor: pointer;
+    user-select: none;
+}
+
+.params-header h3 {
+    margin: 0;
+}
+
+.chevron {
+    font-size: 24px;
+    color: #6b7280;
+    font-weight: 700;
 }
 
 .parameters-section h3 {
@@ -121,10 +140,12 @@ h1 {
     border-radius: 3px;
     outline: none;
     -webkit-appearance: none;
+    appearance: none;
 }
 
 .parameter-group input[type="range"]::-webkit-slider-thumb {
     -webkit-appearance: none;
+    appearance: none;
     appearance: none;
     width: 20px;
     height: 20px;

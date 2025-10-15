@@ -53,6 +53,21 @@ async function checkDataAvailability() {
     }
 }
 
+function toggleParams() {
+    const content = document.getElementById('parametersContent');
+    const chevron = document.getElementById('paramsChevron');
+    const expanded = content.style.display !== 'none';
+    if (expanded) {
+        content.style.display = 'none';
+        chevron.textContent = '▸';
+        document.querySelector('.params-header').setAttribute('aria-expanded', 'false');
+    } else {
+        content.style.display = 'block';
+        chevron.textContent = '▾';
+        document.querySelector('.params-header').setAttribute('aria-expanded', 'true');
+    }
+}
+
 async function loadSample(sampleId) {
     // Reset view and show loading
     document.getElementById('loading').style.display = 'block';
@@ -102,6 +117,12 @@ async function loadSample(sampleId) {
 
             displayResults(data);
             showStatus('✅ Loaded sample data successfully!', 'status-success');
+
+            // Smooth scroll to results
+            const resultsEl = document.getElementById('results');
+            if (resultsEl) {
+                resultsEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
         } else {
             throw new Error(data.error || 'Sample analysis failed');
         }

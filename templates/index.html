@@ -46,8 +46,12 @@
         
         <!-- Parameters Section -->
         <div class="parameters-section">
-            <h3>⚙️ Model Parameters</h3>
-            <div class="parameters-grid">
+            <div class="params-header" onclick="toggleParams()" role="button" aria-expanded="false" aria-controls="parametersContent">
+                <h3>⚙️ Model Parameters</h3>
+                <span id="paramsChevron" class="chevron">▸</span>
+            </div>
+            <div id="parametersContent" class="parameters-content" style="display: none;">
+                <div class="parameters-grid">
                 <div class="parameter-group">
                     <label for="visWeight">Visibility Weight</label>
                     <input type="range" id="visWeight" min="0" max="5" step="0.1" value="1.5">
@@ -77,6 +81,7 @@
                     <label for="alpha">Visibility Decay (α)</label>
                     <input type="range" id="alpha" min="0.05" max="0.5" step="0.01" value="0.15">
                     <div class="parameter-value" id="alphaValue">0.15</div>
+                </div>
                 </div>
             </div>
         </div>
