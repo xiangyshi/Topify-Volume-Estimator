@@ -1,7 +1,6 @@
 import math
 import numpy as np
 import pandas as pd
-from sklearn.preprocessing import MinMaxScaler
 from util.hf_client import get_similarities
 from typing import Callable, List, Optional, Dict, Any
 
@@ -34,7 +33,6 @@ class ChatGPTVolumeEstimator:
         self.lambdas = lambdas
         self.alpha = alpha
         self.similarity_func = similarity_func
-        self.scaler = MinMaxScaler()
         self.feature_columns = ['vis', 'sem', 'auth', 'feat', 'est_clicks']
     
     def _compute_visibility(self, rank: float) -> float:
@@ -121,10 +119,12 @@ class ChatGPTVolumeEstimator:
         # 5. Compute Estimated clicks (Est_clicks) - placeholder for future implementation
         result_df['est_clicks'] = result_df['rank_absolute'].apply(lambda x: 0)
         
-        # 6. Scale features to [0, 1] range to prevent bias
-        scaled_features = self.scaler.fit_transform(result_df[self.feature_columns])
-        for i, col in enumerate(self.feature_columns):
-            result_df[f'{col}_scaled'] = scaled_features[:, i]
+        # 6. Scale features to [0, 1] range with min-max per column
+        for col in self.feature_columns:
+            col_min = float(result_df[col].min())
+            col_max = float(result_df[col].max())
+            denom = (col_max - col_min) if (col_max - col_min) != 0 else 1.0
+            result_df[f'{col}_scaled'] = (result_df[col] - col_min) / denom
         
         # 7. Compute final logit score with scaled features
         result_df['logit'] = result_df.apply(
@@ -167,10 +167,12 @@ class ChatGPTVolumeEstimator:
         result_df['feat'] = result_df.apply(self._compute_feature_score, axis=1)
         result_df['est_clicks'] = result_df['rank_absolute'].apply(lambda x: 0)
         
-        # Scale features using fitted scaler
-        scaled_features = self.scaler.transform(result_df[self.feature_columns])
-        for i, col in enumerate(self.feature_columns):
-            result_df[f'{col}_scaled'] = scaled_features[:, i]
+        # Scale features to [0, 1] using min-max per column (no persistent state)
+        for col in self.feature_columns:
+            col_min = float(result_df[col].min())
+            col_max = float(result_df[col].max())
+            denom = (col_max - col_min) if (col_max - col_min) != 0 else 1.0
+            result_df[f'{col}_scaled'] = (result_df[col] - col_min) / denom
         
         # Compute logit and domain share
         result_df['logit'] = result_df.apply(

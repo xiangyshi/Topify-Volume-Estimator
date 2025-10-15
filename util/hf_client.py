@@ -1,12 +1,11 @@
-from sklearn.feature_extraction.text import TfidfVectorizer
-from sklearn.metrics.pairwise import cosine_similarity
 from typing import List
 import numpy as np
-import warnings
-warnings.filterwarnings("ignore")
+import math
+import re
 
-# Use TF-IDF for lightweight text similarity (no heavy ML models)
-vectorizer = TfidfVectorizer(max_features=1000, stop_words='english')
+STOPWORDS = set([
+    'the','a','an','and','or','but','if','while','for','to','of','in','on','at','by','with','as','is','are','was','were','be','been','being','it','this','that'
+])
 
 def clean_text(text):
     """Clean text by handling NaN values and ensuring string format"""
@@ -14,49 +13,65 @@ def clean_text(text):
         return ""
     return str(text).strip()
 
+def tokenize(text: str) -> List[str]:
+    text = text.lower()
+    tokens = re.findall(r"[a-z0-9]+", text)
+    return [t for t in tokens if t not in STOPWORDS]
+
 def get_embeddings(texts):
-    """Get TF-IDF embeddings for a list of texts"""
+    """Get simple normalized bag-of-words vectors (lightweight)."""
     if isinstance(texts, str):
         texts = [texts]
-    
-    # Clean all texts to handle NaN values
     cleaned_texts = [clean_text(text) for text in texts]
-    
-    # Filter out empty texts
-    non_empty_texts = [text for text in cleaned_texts if text]
-    
-    if not non_empty_texts:
-        # Return zero vector if no valid texts
-        return np.zeros((len(texts), 1000))
-    
-    return vectorizer.fit_transform(non_empty_texts).toarray()
+    tokenized = [tokenize(t) for t in cleaned_texts]
+    # Build vocabulary
+    vocab = {}
+    for tokens in tokenized:
+        for t in tokens:
+            if t not in vocab:
+                vocab[t] = len(vocab)
+            if len(vocab) >= 2000:
+                break
+        if len(vocab) >= 2000:
+            break
+    if not vocab:
+        return np.zeros((len(texts), 1))
+    # Build vectors
+    vecs = np.zeros((len(texts), len(vocab)), dtype=float)
+    for i, tokens in enumerate(tokenized):
+        for t in tokens:
+            idx = vocab.get(t)
+            if idx is not None:
+                vecs[i, idx] += 1.0
+        # Normalize
+        norm = math.sqrt(float((vecs[i] ** 2).sum()))
+        if norm > 0:
+            vecs[i] /= norm
+    return vecs
 
 def get_similarity(text1, text2):
-    """Get similarity between two texts using TF-IDF"""
+    """Cosine similarity between two lightweight BoW vectors."""
     embeddings = get_embeddings([text1, text2])
-    
-    # Handle case where embeddings might be zero vectors
-    if np.all(embeddings[0] == 0) or np.all(embeddings[1] == 0):
+    v1, v2 = embeddings[0], embeddings[1]
+    denom = (np.linalg.norm(v1) * np.linalg.norm(v2))
+    if denom == 0:
         return 0.0
-    
-    similarity = cosine_similarity([embeddings[0]], [embeddings[1]])[0][0]
-    return float(similarity)
+    return float(np.dot(v1, v2) / denom)
 
 def get_similarities(source_sentence: str, query_sentences: List[str]):
     """Get similarity between a source sentence and a list of query sentences"""
     all_texts = [source_sentence] + query_sentences
     embeddings = get_embeddings(all_texts)
     
-    # Calculate similarities with the first text (source_sentence)
-    similarities = []
+    # Calculate cosine similarities with the first vector
+    v0 = embeddings[0]
+    v0_norm = np.linalg.norm(v0)
+    sims = []
     for i in range(1, len(embeddings)):
-        if np.all(embeddings[0] == 0) or np.all(embeddings[i] == 0):
-            similarities.append(0.0)
-        else:
-            sim = cosine_similarity([embeddings[0]], [embeddings[i]])[0][0]
-            similarities.append(float(sim))
-    
-    return similarities
+        vi = embeddings[i]
+        denom = (v0_norm * np.linalg.norm(vi))
+        sims.append(float(np.dot(v0, vi) / denom) if denom != 0 else 0.0)
+    return sims
 
 # Example usage
 if __name__ == "__main__":
