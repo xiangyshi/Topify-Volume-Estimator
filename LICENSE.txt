@@ -1,0 +1,9 @@
+Copyright (c) 2025 Leo Shi. All rights reserved.
+
+Permission Statement:
+
+I, Xiangyu(Leo) Shi, grant Topify.ai limited permission to use my model and code submitted for internal proof-of-concept and research purposes only.
+
+This permission does not transfer ownership or grant any rights for commercial use, redistribution, modification, sublicensing, or integration into any commercial products or services without my explicit written consent.
+
+All intellectual property rights remain with me, Leo Shi. Any other use of this work outside the specified scope is prohibited.

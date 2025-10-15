@@ -53,6 +53,65 @@ async function checkDataAvailability() {
     }
 }
 
+async function loadSample(sampleId) {
+    // Reset view and show loading
+    document.getElementById('loading').style.display = 'block';
+    document.getElementById('results').style.display = 'none';
+    showStatus('Loading sample data…', 'status-info');
+
+    // Toggle active style on demo buttons
+    const demoBtnVideoinu = document.getElementById('demoBtnVideoinu');
+    const demoBtnWeather = document.getElementById('demoBtnWeather');
+    if (demoBtnVideoinu && demoBtnWeather) {
+        if (sampleId === 'videoinu') {
+            demoBtnVideoinu.classList.add('primary');
+            demoBtnWeather.classList.remove('primary');
+        } else if (sampleId === 'weather') {
+            demoBtnWeather.classList.add('primary');
+            demoBtnVideoinu.classList.remove('primary');
+        }
+    }
+
+    // Use current slider params
+    const lambdas = [
+        parseFloat(document.getElementById('visWeight').value),
+        parseFloat(document.getElementById('semWeight').value),
+        0.0,
+        parseFloat(document.getElementById('featWeight').value),
+        0.0
+    ];
+    const alpha = parseFloat(document.getElementById('alpha').value);
+
+    try {
+        const response = await fetch('/analyze-sample', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ sample_id: sampleId, lambdas, alpha })
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.error || 'Sample analysis failed');
+        }
+
+        const data = await response.json();
+        if (data.success) {
+            // Populate keyword/domain fields for clarity
+            document.getElementById('keyword').value = data.keyword || '';
+            document.getElementById('domain').value = data.domain || '';
+
+            displayResults(data);
+            showStatus('✅ Loaded sample data successfully!', 'status-success');
+        } else {
+            throw new Error(data.error || 'Sample analysis failed');
+        }
+    } catch (err) {
+        showStatus('❌ Error: ' + err.message, 'status-error');
+    } finally {
+        document.getElementById('loading').style.display = 'none';
+    }
+}
+
 function showStatus(message, type) {
     const statusDiv = document.getElementById('statusMessage');
     statusDiv.textContent = message;

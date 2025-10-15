@@ -188,6 +188,122 @@ def analyze():
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
+@app.route('/analyze-sample', methods=['POST'])
+def analyze_sample():
+    """Analyze one of the bundled sample datasets without requiring an API token."""
+    try:
+        data = request.json or {}
+        sample_id = (data.get('sample_id') or '').strip().lower()
+        lambdas = data.get('lambdas', [1.5, 1.0, 0.0, 1.0, 0.0])
+        alpha = data.get('alpha', 0.15)
+
+        samples = {
+            'videoinu': {
+                'file': 'data/api_responses/api_responses_faceless_video_ai_videoinu_com_20251005_144925.json',
+                'domain': 'videoinu.com'
+            },
+            'weather': {
+                'file': 'data/api_responses/api_responses_weather_weather_com_20251005_210025.json',
+                'domain': 'weather.com'
+            }
+        }
+
+        if sample_id not in samples:
+            return jsonify({'error': 'Unknown sample_id'}), 400
+
+        sample = samples[sample_id]
+        data_file = sample['file']
+        domain = sample['domain']
+
+        if not os.path.exists(data_file):
+            return jsonify({'error': f'Sample file not found: {data_file}'}), 404
+
+        # Parse the data file
+        try:
+            with open(data_file, 'r', encoding='utf-8') as f:
+                json_data = json.load(f)
+            parsed_data = response_parser.parse_api_responses_from_dict(json_data)
+
+            if parsed_data["serp_df"] is None:
+                return jsonify({'error': 'No SERP data found in sample file'}), 500
+            if parsed_data["keyword"] is None:
+                return jsonify({'error': 'No keyword data found in sample file'}), 500
+            if parsed_data["volume"] == 0:
+                return jsonify({'error': 'No search volume data found in sample file'}), 500
+        except Exception as e:
+            return jsonify({'error': f'Failed to parse sample data: {str(e)}'}), 500
+
+        # Initialize estimator with provided parameters
+        estimator = ChatGPTVolumeEstimator(lambdas=lambdas, alpha=alpha)
+
+        # Process data
+        processed = estimator.fit_transform(parsed_data["serp_df"], parsed_data["keyword"])
+        processed["ai_potential_volume"] = processed["domain_share"] * parsed_data["volume"]
+
+        # Group by domain to handle duplicates
+        domain_stats = processed.groupby('domain').agg({
+            'rank_absolute': ['min', 'max', 'count', 'mean'],
+            'logit': ['min', 'max', 'mean'],
+            'domain_share': 'sum',
+            'ai_potential_volume': 'sum'
+        }).round(3)
+
+        domain_stats.columns = ['_'.join(col).strip() for col in domain_stats.columns]
+        domain_stats = domain_stats.reset_index()
+        domain_stats = domain_stats.rename(columns={
+            'rank_absolute_min': 'best_rank',
+            'rank_absolute_max': 'worst_rank',
+            'rank_absolute_count': 'appearances',
+            'rank_absolute_mean': 'avg_rank',
+            'logit_min': 'min_logit',
+            'logit_max': 'max_logit',
+            'logit_mean': 'avg_logit',
+            'domain_share_sum': 'total_domain_share',
+            'ai_potential_volume_sum': 'total_ai_volume'
+        })
+
+        results = domain_stats.sort_values(by="total_ai_volume", ascending=False)
+        total_volume = results["total_ai_volume"].sum()
+        top_share = results.iloc[0]['total_domain_share'] if len(results) > 0 else 0
+
+        target_domain_stats = None
+        if domain in results['domain'].values:
+            target_row = results[results['domain'] == domain].iloc[0]
+            target_domain_stats = {
+                'domain': target_row['domain'],
+                'appearances': int(target_row['appearances']),
+                'best_rank': int(target_row['best_rank']),
+                'worst_rank': int(target_row['worst_rank']),
+                'avg_rank': round(target_row['avg_rank'], 1),
+                'total_domain_share': round(target_row['total_domain_share'], 3),
+                'total_ai_volume': round(target_row['total_ai_volume'], 1),
+                'avg_logit': round(target_row['avg_logit'], 2),
+                'max_logit': round(target_row['max_logit'], 2),
+                'min_logit': round(target_row['min_logit'], 2)
+            }
+
+        normal_results = processed[["domain", "rank_absolute", "logit", "domain_share", "ai_potential_volume"]].copy() \
+            .sort_values(by="ai_potential_volume", ascending=False)
+
+        results_json = results.to_dict('records')
+        normal_results_json = normal_results.to_dict('records')
+
+        return jsonify({
+            'success': True,
+            'keyword': parsed_data['keyword'],
+            'domain': domain,
+            'volume': parsed_data['volume'],
+            'total_volume': total_volume,
+            'top_share': top_share,
+            'data_file': data_file,
+            'results': results_json,
+            'normal_results': normal_results_json,
+            'target_domain_stats': target_domain_stats,
+            'feature_importance': estimator.get_feature_importance()
+        })
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
 @app.route('/api/config', methods=['GET'])
 def get_config():
     """Get default configuration."""

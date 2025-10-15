@@ -10,6 +10,19 @@
     <div class="container">
         <h1>ChatGPT Volume Estimator</h1>
         
+        <!-- Demo Section (Prominent) -->
+        <div class="demo-card">
+            <div class="demo-header">
+                <h3>🎬 Instant Demo</h3>
+                <p>No API key needed — preview sample analyses instantly.</p>
+            </div>
+            <div class="demo-actions">
+                <button class="demo-button primary" id="demoBtnVideoinu" onclick="loadSample('videoinu')">View sample: videoinu.com</button>
+                <button class="demo-button" id="demoBtnWeather" onclick="loadSample('weather')">View sample: weather.com</button>
+            </div>
+            <div class="demo-note">Or enter your own keyword/domain below.</div>
+        </div>
+        
         <!-- Input Section -->
         <div class="input-section">
             <div class="input-group">
@@ -70,7 +83,7 @@
         
         <!-- Status Message -->
         <div id="statusMessage" class="status-message" style="display: none;"></div>
-        
+
         <!-- Analyze Button -->
         <button id="analyzeBtn" onclick="analyze()">🚀 Analyze Keyword & Domain</button>
         
@@ -150,5 +163,6 @@
     </div>
 
     <script src="{{ url_for('static', filename='scripts.js') }}"></script>
+    <p style="font-size: 0.85em; color: #666; margin-top: 2em;">© 2025 Leo Shi — POC code licensed for internal research use by Topify.ai only. Commercial use and redistribution are prohibited.</p>
 </body>
 </html>
